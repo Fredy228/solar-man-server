@@ -40,7 +40,3 @@ app.use((err, req, res, next) => {
 https.createServer(options, app).listen(443, () => {
   console.log('Server started on port 443');
 });
-
-// app.listen(443, () => {
-//   console.log('Server started on port 443');
-// });
