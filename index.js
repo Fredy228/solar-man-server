@@ -2,17 +2,18 @@ const express = require('express');
 const logger = require('morgan');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
-const https = require('https');
+// const fs = require('fs');
+// const https = require('https');
 
-const options = {
-  cert: fs.readFileSync(
-    '../../etc/letsencrypt/live/solarman.pro/fullchain.pem'
-  ),
-  key: fs.readFileSync('../../etc/letsencrypt/live/solarman.pro/privkey.pem'),
-};
+// const options = {
+//   cert: fs.readFileSync(
+//     '../../etc/letsencrypt/live/solarman.pro/fullchain.pem'
+//   ),
+//   key: fs.readFileSync('../../etc/letsencrypt/live/solarman.pro/privkey.pem'),
+// };
 
 const sendEmailRouter = require('./routes/sendEmailRoute');
+const usersRouter = require('./routes/usersRoute');
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(express.json());
 app.use(express.static('build'));
 
 app.use('/api/phone-send', sendEmailRouter);
+app.use('/api/admin', usersRouter);
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
@@ -37,6 +39,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: err.message });
 });
 
-https.createServer(options, app).listen(443, () => {
-  console.log('Server started on port 443');
+// https.createServer(options, app).listen(443, () => {
+//   console.log('Server started on port 443');
+// });
+app.listen(3000, () => {
+  console.log('Server started on port 5000');
 });

@@ -10,4 +10,35 @@ exports.sendEmailValidator = data =>
         )
         .required(),
     })
+    .options({ stripUnknown: true })
+    .validate(data);
+
+exports.userRegister = data =>
+  Joi.object()
+    .keys({
+      name: Joi.string()
+        .pattern(/^[a-zA-Z0-9_\-\.]{2,20}$/)
+        .min(2)
+        .max(20)
+        .required(),
+      role: Joi.string().valid('admin', 'moderator', 'user').default('user'),
+      email: Joi.string().email().required(),
+      password: Joi.string()
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,30}$/)
+        .required(),
+    })
+    .options({ stripUnknown: true })
+    .validate(data);
+
+exports.userUpdate = data =>
+  Joi.object()
+    .keys({
+      name: Joi.string()
+        .pattern(/^[a-zA-Z0-9_\-\.]{2,20}$/)
+        .min(2)
+        .max(20)
+        .required(),
+      email: Joi.string().email(),
+    })
+    .options({ stripUnknown: true })
     .validate(data);

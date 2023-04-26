@@ -21,10 +21,12 @@
     "express": "^4.18.2",
     "https": "^1.0.0",
     "joi": "^17.9.1",
+    "mongodb": "^5.3.0",
     "mongoose": "^7.0.4",
     "morgan": "^1.10.0",
     "node-telegram-bot-api": "^0.61.0",
     "nodemailer": "^6.9.1",
-    "nodemailer-mailgun-transport": "^2.1.5"
+    "nodemailer-mailgun-transport": "^2.1.5",
+    "sqlite3": "^5.1.6"
   }
 }
