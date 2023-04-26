@@ -128,13 +128,13 @@ const deleteUser = id => {
   });
 };
 
-const updateUser = ({ name, email, token, id }) => {
+const updateUser = ({ name, email, token, id, role }) => {
   return new Promise((resolve, reject) => {
     const db = toConectDB();
 
     db.run(
-      `UPDATE users SET name = COALESCE(?, name), email = COALESCE(?, email), token = COALESCE(?, token) WHERE id = ?`,
-      [name, email, token, id],
+      `UPDATE users SET name = COALESCE(?, name), email = COALESCE(?, email), role = COALESCE(?, role), token = COALESCE(?, token) WHERE id = ?`,
+      [name, email, role, token, id],
       function (err) {
         if (err) reject(err.message);
 
@@ -151,12 +151,13 @@ const updateUser = ({ name, email, token, id }) => {
 };
 
 const updatePass = async (password, id) => {
+  const hashedPass = await hashPassword(password);
   return new Promise((resolve, reject) => {
     const db = toConectDB();
 
     db.run(
       `UPDATE users SET password = COALESCE(?, password) WHERE id = ?`,
-      [password, id],
+      [hashedPass, id],
       function (err) {
         if (err) reject(err.message);
 

@@ -35,9 +35,12 @@ exports.userUpdate = data =>
       name: Joi.string()
         .pattern(/^[a-zA-Z0-9_\-\.]{2,20}$/)
         .min(2)
-        .max(20)
-        .required(),
+        .max(20),
       email: Joi.string().email(),
+      role: Joi.string().valid('admin', 'moderator', 'user'),
+      newPass: Joi.string().regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,30}$/
+      ),
     })
     .options({ stripUnknown: true })
     .validate(data);

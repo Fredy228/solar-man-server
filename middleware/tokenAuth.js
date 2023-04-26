@@ -34,3 +34,9 @@ module.exports.protect = async (req, res, next) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+module.exports.allowFor = role => (req, res, next) => {
+  if (role.includes(req.user.role)) return next();
+
+  next(new Error('403 You are not allowed to perform this action..'));
+};
