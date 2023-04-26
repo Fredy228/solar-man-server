@@ -1,4 +1,8 @@
 const sqlite3 = require('sqlite3').verbose();
+const { v4: uuidv4 } = require('uuid');
+
+const { hashPassword } = require('../services/hashPassword');
+const { singToken } = require('../services/createToken');
 
 const toConectDB = () => {
   const db = new sqlite3.Database('database/database.db', err => {
@@ -17,7 +21,7 @@ const toConectDB = () => {
       if (!result) {
         // Таблицы не существует, создаем ее
         db.run(
-          'CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT, role TEXT, password TEXT)',
+          'CREATE TABLE users (id TEXT, name TEXT, email TEXT, role TEXT, password TEXT, token TEXT)',
           err => {
             if (err) {
               console.error(err.message);
@@ -43,18 +47,23 @@ const toCloseDB = db => {
   });
 };
 
-const createUser = (name, email, role, password) => {
+const createUser = async (name, email, role, password) => {
+  const hashedPass = await hashPassword(password);
+
   return new Promise((resolve, reject) => {
     const db = toConectDB();
 
+    const id = uuidv4();
+    const token = singToken(id);
+
     db.run(
-      `INSERT INTO users(name, email, role, password) VALUES(?,?,?,?)`,
-      [name, email, role, password],
+      `INSERT INTO users(id, name, email, role, password, token) VALUES(?,?,?,?,?,?)`,
+      [id, name, email, role, hashedPass, token],
       function (err) {
         if (err) reject(err.message);
 
-        const id = this.lastID;
-        const newUser = { id, name, email, role };
+        const newUser = { id, name, email, role, token };
+        console.log(newUser);
         resolve(newUser);
       }
     );
@@ -77,7 +86,21 @@ const getUsers = () => {
   });
 };
 
-const checkDoubleName = name => {
+const getUserById = id => {
+  return new Promise((resolve, reject) => {
+    const db = toConectDB();
+
+    db.get(`SELECT * FROM users WHERE id = ?`, [id], (err, row) => {
+      if (err) reject(err.message);
+
+      resolve(row);
+    });
+
+    toCloseDB(db);
+  });
+};
+
+const getUserByName = name => {
   return new Promise((resolve, reject) => {
     const db = toConectDB();
 
@@ -105,13 +128,35 @@ const deleteUser = id => {
   });
 };
 
-const updateUser = (name, email, id) => {
+const updateUser = ({ name, email, token, id }) => {
   return new Promise((resolve, reject) => {
     const db = toConectDB();
 
     db.run(
-      `UPDATE users SET name = COALESCE(?, name), email = COALESCE(?, email) WHERE id = ?`,
-      [name, email, id],
+      `UPDATE users SET name = COALESCE(?, name), email = COALESCE(?, email), token = COALESCE(?, token) WHERE id = ?`,
+      [name, email, token, id],
+      function (err) {
+        if (err) reject(err.message);
+
+        db.get(`SELECT * FROM users WHERE id = ?`, [id], function (err, row) {
+          if (err) reject(err.message);
+
+          resolve(row);
+        });
+      }
+    );
+
+    toCloseDB(db);
+  });
+};
+
+const updatePass = async (password, id) => {
+  return new Promise((resolve, reject) => {
+    const db = toConectDB();
+
+    db.run(
+      `UPDATE users SET password = COALESCE(?, password) WHERE id = ?`,
+      [password, id],
       function (err) {
         if (err) reject(err.message);
 
@@ -130,7 +175,9 @@ const updateUser = (name, email, id) => {
 module.exports = {
   createUser,
   getUsers,
+  getUserById,
   deleteUser,
   updateUser,
-  checkDoubleName,
+  getUserByName,
+  updatePass,
 };

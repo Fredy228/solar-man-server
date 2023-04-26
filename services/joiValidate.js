@@ -22,7 +22,6 @@ exports.userRegister = data =>
         .max(20)
         .required(),
       role: Joi.string().valid('admin', 'moderator', 'user').default('user'),
-      email: Joi.string().email().required(),
       password: Joi.string()
         .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,30}$/)
         .required(),
