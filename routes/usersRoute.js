@@ -16,7 +16,7 @@ const {
   getUserByName,
 } = require('../database/userDB');
 
-router.post('/register', async (req, res) => {
+router.post('/register', protect, allowFor('admin'), async (req, res) => {
   try {
     const { value, error } = validators.userRegister(req.body);
 
@@ -72,6 +72,16 @@ router.post('/logout', protect, async (req, res) => {
 
     res.status(204).json({
       Status: '204 No Content',
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.get('/check-auth', protect, async (req, res) => {
+  try {
+    res.status(200).json({
+      status: true,
     });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -135,7 +145,6 @@ router.patch('/update-me', protect, async (req, res) => {
     const { value, error } = validators.userUpdate(req.body);
 
     if (error) return res.status(400).json({ message: error.message });
-
     const { name, email } = value;
 
     const user = await getUserByName(name);
@@ -150,6 +159,7 @@ router.patch('/update-me', protect, async (req, res) => {
 
     res.status(200).json({ Status: 'OK Patched', user: updatedUser });
   } catch (error) {
+    console.error(error);
     res.status(400).json({ message: error.message });
   }
 });
