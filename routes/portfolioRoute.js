@@ -57,7 +57,7 @@ router.post(
   }
 );
 
-router.get('/', protect, allowFor('admin moderator user'), async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const { limit, page } = req.query;
     const posts = await getPosts();
