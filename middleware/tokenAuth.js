@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const { getUserById } = require('../database/userDB');
+const { getUserById } = require('../services/userDB');
 
 module.exports.protect = async (req, res, next) => {
   try {

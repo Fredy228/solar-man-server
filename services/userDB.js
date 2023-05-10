@@ -1,11 +1,11 @@
 const sqlite3 = require('sqlite3').verbose();
 const { v4: uuidv4 } = require('uuid');
 
-const { hashPassword } = require('../services/hashPassword');
-const { singToken } = require('../services/createToken');
+const { hashPassword } = require('./hashPassword');
+const { singToken } = require('./createToken');
 
 const toConectDB = () => {
-  const db = new sqlite3.Database('database/database.db', err => {
+  const db = new sqlite3.Database('database/users.db', err => {
     if (err) {
       console.error(err.message);
     }
@@ -95,7 +95,6 @@ const getUserById = id => {
 
       resolve(row);
     });
-
     toCloseDB(db);
   });
 };

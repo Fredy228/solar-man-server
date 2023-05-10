@@ -44,3 +44,23 @@ exports.userUpdate = data =>
     })
     .options({ stripUnknown: true })
     .validate(data);
+
+exports.createPost = data =>
+  Joi.object()
+    .keys({
+      title: Joi.string().min(20).max(80).required(),
+      year: Joi.string().max(4).required(),
+      components: Joi.array().required(),
+    })
+    .options({ stripUnknown: true })
+    .validate(data);
+
+exports.updatePost = data =>
+  Joi.object()
+    .keys({
+      title: Joi.string().min(20).max(80),
+      year: Joi.string().max(4),
+      components: Joi.array(),
+    })
+    .options({ stripUnknown: true })
+    .validate(data);

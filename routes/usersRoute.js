@@ -14,7 +14,7 @@ const {
   deleteUser,
   updateUser,
   getUserByName,
-} = require('../database/userDB');
+} = require('../services/userDB');
 
 router.post('/register', protect, allowFor('admin'), async (req, res) => {
   try {
