@@ -72,24 +72,19 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get(
-  '/:idPost',
-  protect,
-  allowFor('admin moderator'),
-  async (req, res) => {
-    try {
-      const { idPost } = req.params;
-      if (!idPost) return res.status(400).json({ message: 'Id не знайдено' });
+router.get('/:idPost', async (req, res) => {
+  try {
+    const { idPost } = req.params;
+    if (!idPost) return res.status(400).json({ message: 'Id не знайдено' });
 
-      const post = await getPostById(idPost);
-      if (!post) return res.status(400).json({ message: 'Post не знайдено' });
+    const post = await getPostById(idPost);
+    if (!post) return res.status(400).json({ message: 'Post не знайдено' });
 
-      res.status(200).json({ post });
-    } catch (err) {
-      res.status(400).json({ message: err });
-    }
+    res.status(200).json({ post });
+  } catch (err) {
+    res.status(400).json({ message: err });
   }
-);
+});
 
 router.delete(
   '/:idPost',

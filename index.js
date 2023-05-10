@@ -20,7 +20,7 @@ app.use('/api/phone-send', sendEmailRouter);
 app.use('/api/admin', usersRouter);
 app.use('/api/admin/portfolio', portfolioRouter);
 
-app.get('/', (req, res) => {
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
