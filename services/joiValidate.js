@@ -52,7 +52,6 @@ exports.createPost = data =>
       year: Joi.string().max(4).required(),
       components: Joi.array().required(),
     })
-    .options({ stripUnknown: true })
     .validate(data);
 
 exports.updatePost = data =>

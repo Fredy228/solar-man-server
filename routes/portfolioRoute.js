@@ -37,9 +37,14 @@ router.post(
       const { file } = req;
       if (!file) return res.status(400).json({ message: 'Not upload image' });
 
-      const { value, error } = validators.createPost(req.body);
-      if (!error) return res.status(400).json({ message: error });
-      const { title, year, components } = value;
+      const { title, year, components } = req.body;
+      const { value, error } = validators.createPost({
+        title,
+        year,
+        components: JSON.parse(components),
+      });
+
+      if (error) return res.status(400).json({ message: error });
 
       const urlImg = await ImageService.save(
         file,
@@ -48,9 +53,19 @@ router.post(
         'portfolio'
       );
 
-      await createPost(title, year, components, urlImg);
+      await createPost(
+        value.title,
+        value.year,
+        JSON.stringify(value.components),
+        urlImg
+      );
 
-      res.status(200).json({ title, year, components, urlImg });
+      res.status(200).json({
+        title: value.title,
+        year: value.year,
+        components: value.components,
+        urlImg,
+      });
     } catch (err) {
       res.status(400).json({ message: err });
     }
@@ -100,10 +115,7 @@ router.delete(
 
       const filePath = path.join(__dirname, '..', 'static', `${post.urlImg}`);
       fse.unlink(filePath, err => {
-        if (err) {
-          console.error(err);
-          return;
-        }
+        if (err) return console.error(err);
       });
 
       const data = await deletePosts(idPost);
@@ -128,9 +140,15 @@ router.patch(
       const post = await getPostById(idPost);
       if (!post) return res.status(400).json({ message: 'Post не знайдено' });
 
-      const { value, error } = validators.createPost(req.body);
-      if (!error) return res.status(400).json({ message: error });
-      const { title, year, components } = value;
+      const { title, year, components } = req.body;
+      const { value, error } = validators.createPost({
+        title,
+        year,
+        components: JSON.parse(components),
+      });
+
+      if (error) return res.status(400).json({ message: error });
+
       let urlImg = undefined;
 
       const { file } = req;
@@ -148,7 +166,13 @@ router.patch(
         );
       }
 
-      const data = await updatePost(idPost, title, year, components, urlImg);
+      const data = await updatePost(
+        idPost,
+        value.title,
+        value.year,
+        JSON.stringify(value.components),
+        urlImg
+      );
 
       res.status(200).json({ post: data });
     } catch (err) {
