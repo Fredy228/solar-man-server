@@ -5,6 +5,8 @@ const path = require('path');
 const sendEmailRouter = require('./routes/sendEmailRoute');
 const usersRouter = require('./routes/usersRoute');
 const portfolioRouter = require('./routes/portfolioRoute');
+const storeSetsRouter = require('./routes/storeSetsRoutes');
+const storeComponentsRouter = require('./routes/storeComponentsRoutes');
 
 const app = express();
 
@@ -19,6 +21,8 @@ app.use(express.static('static'));
 app.use('/api/phone-send', sendEmailRouter);
 app.use('/api/admin', usersRouter);
 app.use('/api/admin/portfolio', portfolioRouter);
+app.use('/api/admin/store-sets', storeSetsRouter);
+app.use('/api/admin/store-components', storeComponentsRouter);
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
@@ -29,9 +33,12 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  res.status(500).json({ message: err.message });
+  const { status = 500, message = 'Server error' } = err;
+  res.status(status).json({ message });
 });
 
-app.listen(3001, () => {
-  console.log('Server started on port 5000');
+const PORT = formatsLogger === 'dev' ? 3001 : 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server started on port ${PORT}`);
 });

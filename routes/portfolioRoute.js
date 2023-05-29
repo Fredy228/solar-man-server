@@ -15,23 +15,17 @@ const {
 } = require('../services/portfolioDB');
 
 const validators = require('../services/joiValidate');
+const paginateItems = require('../services/paginateItems');
 
 const router = express.Router();
 
 const upload = multer();
 
-const paginateItems = (sortedArray, limit, page) => {
-  const startIndex = (Number(page) - 1) * Number(limit);
-  const endIndex = startIndex + Number(limit);
-
-  return sortedArray.slice(startIndex, endIndex);
-};
-
 router.post(
   '/',
-  upload.single('photo'),
   protect,
   allowFor('admin moderator'),
+  upload.single('photo'),
   async (req, res) => {
     try {
       const { file } = req;

@@ -42,9 +42,15 @@ router.post('/email', async (req, res) => {
   });
 });
 
-const token = process.env.TELEGRAM_TOKEN;
+const token =
+  process.env.NODE_ENV === 'development'
+    ? process.env.TELEGRAM_TOKEN_DEV
+    : process.env.TELEGRAM_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
-const chatId = process.env.TELEGRAM_CHAT_ID;
+const chatId =
+  process.env.NODE_ENV === 'development'
+    ? process.env.TELEGRAM_CHAT_ID_DEV
+    : process.env.TELEGRAM_CHAT_ID;
 
 router.post('/telegram', async (req, res) => {
   const { name, phone } = req.body;

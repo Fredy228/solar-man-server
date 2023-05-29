@@ -63,3 +63,48 @@ exports.updatePost = data =>
     })
     .options({ stripUnknown: true })
     .validate(data);
+
+exports.CreateStoreSets = data =>
+  Joi.object()
+    .keys({
+      title: Joi.string().min(2).max(80).required(),
+      type: Joi.string()
+        .valid(
+          'Зелений тариф',
+          'Автономні станції',
+          'Резервне живлення',
+          'Модульні безперебійні системи'
+        )
+        .required(),
+      cost: Joi.number().min(0).required(),
+      power: Joi.string().min(2).max(10).required(),
+      descripMain: Joi.string().required(),
+      descripCharacter: Joi.array().items(Joi.object()).required(),
+      components: Joi.array().items(Joi.object()).required(),
+    })
+    .options({ stripUnknown: true })
+    .validate(data);
+
+exports.CreateStoreComponents = data =>
+  Joi.object()
+    .keys({
+      title: Joi.string().min(2).max(80).required(),
+      type: Joi.string()
+        .valid(
+          'Панелі',
+          'Інвентори',
+          'Акумулятори',
+          'Кріплення',
+          'Комлпектуючі',
+          'Контролери заряду'
+        )
+        .required(),
+      cost: Joi.number().min(0).required(),
+      brand: Joi.string().min(2).max(20).required(),
+      country: Joi.string().min(2).max(20).required(),
+      descripMain: Joi.string().required(),
+      descripCharacter: Joi.array().items(Joi.object()).required(),
+      optionSort: Joi.object().required(),
+    })
+    .options({ stripUnknown: true })
+    .validate(data);
