@@ -31,7 +31,8 @@ module.exports.protect = async (req, res, next) => {
 
     next();
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    error.status = 401;
+    res.status(401).json({ message: error.message });
   }
 };
 

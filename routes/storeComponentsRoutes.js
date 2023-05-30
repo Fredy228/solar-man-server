@@ -3,7 +3,13 @@ const multer = require('multer');
 const upload = multer();
 
 const { protect, allowFor } = require('../middleware/tokenAuth');
-const { createStoreComponents } = require('../controllers/storeComponentsCtrl');
+const {
+  createStoreComponents,
+  getAllComponents,
+  getComponentById,
+  deleteComponentById,
+  updateStoreComponents,
+} = require('../controllers/storeComponentsCtrl');
 
 const router = express.Router();
 
@@ -13,6 +19,23 @@ router.post(
   allowFor('admin moderator'),
   upload.single('photo'),
   createStoreComponents
+);
+
+router.get('/', getAllComponents);
+router.get('/:setId', getComponentById);
+
+router.delete(
+  '/:setId',
+  protect,
+  allowFor('admin moderator'),
+  deleteComponentById
+);
+router.patch(
+  '/:setId',
+  protect,
+  allowFor('admin moderator'),
+  upload.single('photo'),
+  updateStoreComponents
 );
 
 module.exports = router;

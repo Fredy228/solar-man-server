@@ -9,6 +9,7 @@ const {
   getAllSets,
   deleteSetById,
   getSetById,
+  updateStoreSets,
 } = require('../controllers/storeSetsCtrl');
 
 const router = express.Router();
@@ -28,6 +29,16 @@ router.post(
 router.get('/', getAllSets);
 router.get('/:setId', getSetById);
 
-router.delete('/:setId', deleteSetById);
+router.delete('/:setId', protect, allowFor('admin moderator'), deleteSetById);
+router.patch(
+  '/:setId',
+  protect,
+  allowFor('admin moderator'),
+  upload.fields([
+    { name: 'photo', maxCount: 1 },
+    { name: 'descripPhoto', maxCount: 1 },
+  ]),
+  updateStoreSets
+);
 
 module.exports = router;

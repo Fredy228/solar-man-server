@@ -181,12 +181,53 @@ const getSets = type => {
   });
 };
 
-const getSet = id => {
+const getComponents = type => {
+  return new Promise((resolve, reject) => {
+    const db = toConnectComponentsDB();
+
+    let query = 'SELECT * FROM components';
+
+    if (type !== 'Всі') {
+      query += ` WHERE type = ?`;
+
+      db.all(query, [type], function (err, rows) {
+        if (err) reject(err.message);
+
+        resolve(rows);
+      });
+    }
+
+    if (type === 'Всі') {
+      db.all(query, function (err, rows) {
+        if (err) reject(err.message);
+
+        resolve(rows);
+      });
+    }
+
+    toCloseDB(db);
+  });
+};
+
+const getOneSet = id => {
   return new Promise((resolve, reject) => {
     const db = toConnectSetsDB();
 
     db.get(`SELECT * FROM sets WHERE id = ?`, [id], (err, row) => {
-      if (err) reject(err);
+      if (err) reject(err.message);
+
+      resolve(row);
+    });
+    toCloseDB(db);
+  });
+};
+
+const getOneComponent = id => {
+  return new Promise((resolve, reject) => {
+    const db = toConnectComponentsDB();
+
+    db.get(`SELECT * FROM components WHERE id = ?`, [id], (err, row) => {
+      if (err) reject(err.message);
 
       resolve(row);
     });
@@ -208,10 +249,121 @@ const deleteSet = id => {
   });
 };
 
+const deleteComponents = id => {
+  return new Promise((resolve, reject) => {
+    const db = toConnectComponentsDB();
+
+    db.run(`DELETE FROM components WHERE id = ?`, [id], function (err) {
+      if (err) reject(err);
+
+      resolve(this.changes);
+    });
+
+    toCloseDB(db);
+  });
+};
+
+const updateSet = (
+  id,
+  title,
+  cost,
+  type,
+  power,
+  descripMain,
+  photo,
+  descripCharacter,
+  descripPhoto,
+  components
+) => {
+  return new Promise((resolve, reject) => {
+    const db = toConnectSetsDB();
+
+    db.run(
+      `UPDATE sets SET title = COALESCE(?, title), cost = COALESCE(?, cost), type = COALESCE(?, type), power = COALESCE(?, power), descripMain = COALESCE(?, descripMain), photo = COALESCE(?, photo), descripCharacter = COALESCE(?, descripCharacter), descripPhoto = COALESCE(?, descripPhoto), components = COALESCE(?, components) WHERE id = ?`,
+      [
+        title,
+        cost,
+        type,
+        power,
+        descripMain,
+        photo,
+        descripCharacter,
+        descripPhoto,
+        components,
+        id,
+      ],
+      function (err) {
+        if (err) reject(err.message);
+
+        db.get(`SELECT * FROM sets WHERE id = ?`, [id], function (err, row) {
+          if (err) reject(err.message);
+
+          resolve(row);
+        });
+      }
+    );
+
+    toCloseDB(db);
+  });
+};
+
+const updateComponent = (
+  id,
+  title,
+  type,
+  cost,
+  photo,
+  brand,
+  country,
+  optionSort,
+  descripMain,
+  descripCharacter
+) => {
+  return new Promise((resolve, reject) => {
+    const db = toConnectComponentsDB();
+
+    db.run(
+      `UPDATE components SET title = COALESCE(?, title), type = COALESCE(?, type), cost = COALESCE(?, cost), photo = COALESCE(?, photo), brand = COALESCE(?, brand), country = COALESCE(?, country), optionSort = COALESCE(?, optionSort), descripMain = COALESCE(?, descripMain), descripCharacter = COALESCE(?, descripCharacter) WHERE id = ?`,
+      [
+        title,
+        type,
+        cost,
+        photo,
+        brand,
+        country,
+        optionSort,
+        descripMain,
+        descripCharacter,
+        id,
+      ],
+      function (err) {
+        if (err) reject(err.message);
+
+        db.get(
+          `SELECT * FROM components WHERE id = ?`,
+          [id],
+          function (err, row) {
+            if (err) reject(err.message);
+
+            resolve(row);
+          }
+        );
+      }
+    );
+
+    toCloseDB(db);
+  });
+};
+
 module.exports = {
   createSet,
   createComponents,
   getSets,
+  getComponents,
   deleteSet,
-  getSet,
+  deleteComponents,
+  getOneSet,
+  getOneComponent,
+  updateSet,
+  updateComponent,
 };

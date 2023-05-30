@@ -7,8 +7,9 @@ const httpError = require('../services/httpError');
 const {
   createSet,
   getSets,
-  getSet,
+  getOneSet,
   deleteSet,
+  updateSet,
 } = require('../services/storeDB');
 const paginateItems = require('../services/paginateItems');
 
@@ -150,7 +151,7 @@ const getAllSets = async (req, res) => {
 const getSetById = async (req, res) => {
   const { setId } = req.params;
 
-  const findSet = await getSet(setId);
+  const findSet = await getOneSet(setId);
   if (!findSet) throw httpError(404, `Товар по /${setId}/ не знайдено`);
 
   res.status(200).json({ result: findSet });
@@ -158,10 +159,10 @@ const getSetById = async (req, res) => {
 const deleteSetById = async (req, res) => {
   const { setId } = req.params;
 
-  const findSet = await getSet(setId);
+  const findSet = await getOneSet(setId);
   if (!findSet) throw httpError(404, `Товар по /${setId}/ не знайдено`);
 
-  const filePathPhoto = path.join(
+  const filePathFolder = path.join(
     __dirname,
     '..',
     'static',
@@ -170,11 +171,104 @@ const deleteSetById = async (req, res) => {
     `${findSet.id}`
   );
 
-  await ImageService.deleteFolders([filePathPhoto]);
+  await ImageService.deleteFolders([filePathFolder]);
 
   await deleteSet(setId);
 
   res.status(200).json({ result: findSet.id });
+};
+
+const updateStoreSets = async (req, res) => {
+  const {
+    title,
+    type,
+    cost,
+    power,
+    descripMain,
+    descripCharacter,
+    components,
+  } = req.body;
+
+  const { setId } = req.params;
+
+  const findSet = await getOneSet(setId);
+  if (!findSet) throw httpError(404, `Товар по /${setId}/ не знайдено`);
+
+  const { error } = validators.CreateStoreSets({
+    title,
+    type,
+    cost,
+    power,
+    descripMain,
+    descripCharacter: JSON.parse(descripCharacter),
+    components: JSON.parse(components),
+  });
+  if (error) throw httpError(400, `${error}`);
+
+  let { photo, descripPhoto } = req.files;
+
+  let pathPhoto = undefined;
+  let pathDescripPhoto = undefined;
+
+  if (photo) {
+    pathPhoto = await ImageService.save(
+      photo[0],
+      { width: 500, height: 500 },
+      'images',
+      'store',
+      findSet.id
+    );
+    const filePath = path.join(__dirname, '..', 'static', `${findSet.photo}`);
+
+    await ImageService.deleteImages([filePath]);
+  }
+
+  if (descripPhoto) {
+    pathDescripPhoto = await ImageService.save(
+      descripPhoto[0],
+      { width: 940, height: 700 },
+      'images',
+      'store',
+      findSet.id
+    );
+
+    const filePath = path.join(
+      __dirname,
+      '..',
+      'static',
+      `${findSet.descripPhoto}`
+    );
+
+    await ImageService.deleteImages([filePath]);
+  }
+
+  await updateSet(
+    findSet.id,
+    title,
+    cost,
+    type,
+    power,
+    descripMain,
+    pathPhoto,
+    descripCharacter,
+    pathDescripPhoto,
+    components
+  );
+
+  res.status(201).json({
+    result: {
+      id: findSet.id,
+      title,
+      cost,
+      type,
+      power,
+      descripMain,
+      descripPhoto: pathDescripPhoto,
+      photo: pathPhoto,
+      descripCharacter,
+      components,
+    },
+  });
 };
 
 module.exports = {
@@ -182,4 +276,5 @@ module.exports = {
   getAllSets: ctrlWrapper(getAllSets),
   getSetById: ctrlWrapper(getSetById),
   deleteSetById: ctrlWrapper(deleteSetById),
+  updateStoreSets: ctrlWrapper(updateStoreSets),
 };

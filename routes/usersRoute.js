@@ -50,12 +50,12 @@ router.post('/login', async (req, res) => {
 
     const user = await getUserByName(name);
     if (!user)
-      return res.status(400).json({ message: `Username or password is wrong` });
+      return res.status(401).json({ message: `Username or password is wrong` });
 
     const passIsVavid = await checkPassword(password, user.password);
 
     if (!passIsVavid)
-      return res.status(400).json({ message: `Username or password is wrong` });
+      return res.status(401).json({ message: `Username or password is wrong` });
 
     const token = singToken(user.id);
     const updatedUser = await updateUser({ token, id: user.id });
