@@ -27,11 +27,16 @@ router.post(
 );
 
 router.get('/', getAllSets);
-router.get('/:setId', getSetById);
+router.get('/by-id/:setId', getSetById);
 
-router.delete('/:setId', protect, allowFor('admin moderator'), deleteSetById);
+router.delete(
+  '/by-id/:setId',
+  protect,
+  allowFor('admin moderator'),
+  deleteSetById
+);
 router.patch(
-  '/:setId',
+  '/by-id/:setId',
   protect,
   allowFor('admin moderator'),
   upload.fields([

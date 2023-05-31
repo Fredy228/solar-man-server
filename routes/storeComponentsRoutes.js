@@ -9,6 +9,7 @@ const {
   getComponentById,
   deleteComponentById,
   updateStoreComponents,
+  getComponentOption,
 } = require('../controllers/storeComponentsCtrl');
 
 const router = express.Router();
@@ -22,16 +23,17 @@ router.post(
 );
 
 router.get('/', getAllComponents);
-router.get('/:setId', getComponentById);
+router.get('/by-id/:setId', getComponentById);
+router.get('/option', getComponentOption);
 
 router.delete(
-  '/:setId',
+  '/by-id/:setId',
   protect,
   allowFor('admin moderator'),
   deleteComponentById
 );
 router.patch(
-  '/:setId',
+  '/by-id/:setId',
   protect,
   allowFor('admin moderator'),
   upload.single('photo'),

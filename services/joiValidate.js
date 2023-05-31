@@ -100,8 +100,8 @@ exports.CreateStoreComponents = data =>
         )
         .required(),
       cost: Joi.number().min(0).required(),
-      brand: Joi.string().min(2).max(20).required(),
-      country: Joi.string().min(2).max(20).required(),
+      brand: Joi.string().min(2).max(20).default('unknown'),
+      country: Joi.string().min(2).max(20).default('unknown'),
       descripMain: Joi.string().required(),
       descripCharacter: Joi.array().items(Joi.object()).required(),
       optionSort: Joi.object().required(),

@@ -81,6 +81,88 @@ const createStoreComponents = async (req, res) => {
   });
 };
 
+const getComponentOption = async (req, res) => {
+  const { type = 'Всі' } = req.query;
+
+  let result = await getComponents(type);
+  if (!result) throw httpError(400, `Помилка получення товарів з БД`);
+
+  let sortBrand;
+  let sortCountry;
+  let sortSubtype = undefined;
+  let sortPower = undefined;
+  let sortMaterial = undefined;
+  let sortReservoir = undefined;
+  let sortVoltage = undefined;
+  let sortPhases = undefined;
+
+  const sortBrandV1 = result.filter(i => i.brand !== 'unknown');
+  const sortBrandV2 = sortBrandV1.map(i => i.brand);
+  sortBrand = [...new Set(sortBrandV2)];
+
+  const sortCountryV1 = result.filter(i => i.country !== 'unknown');
+  const sortCountryV2 = sortCountryV1.map(i => i.country);
+  sortCountry = [...new Set(sortCountryV2)];
+
+  if (['Панелі', 'Інвентори', 'Акумулятори', 'Кріплення'].includes(type)) {
+    const sortSubtypeV1 = result.filter(i => JSON.parse(i.optionSort).subtype);
+    const sortSubtypeV2 = sortSubtypeV1.map(
+      i => JSON.parse(i.optionSort).subtype
+    );
+    sortSubtype = [...new Set(sortSubtypeV2)];
+  }
+
+  if (['Панелі', 'Інвентори'].includes(type)) {
+    const sortPowerV1 = result.filter(i => JSON.parse(i.optionSort).power);
+    const sortPowerV2 = sortPowerV1.map(i => JSON.parse(i.optionSort).power);
+    sortPower = [...new Set(sortPowerV2)];
+  }
+
+  if (['Кріплення'].includes(type)) {
+    const sortMaterialV1 = result.filter(
+      i => JSON.parse(i.optionSort).material
+    );
+    const sortMaterialV2 = sortMaterialV1.map(
+      i => JSON.parse(i.optionSort).material
+    );
+    sortMaterial = [...new Set(sortMaterialV2)];
+  }
+
+  if (['Акумулятори'].includes(type)) {
+    const sortReservoirV1 = result.filter(
+      i => JSON.parse(i.optionSort).reservoir
+    );
+    const sortVoltageV1 = result.filter(i => JSON.parse(i.optionSort).voltage);
+    const sortReservoirV2 = sortReservoirV1.map(
+      i => JSON.parse(i.optionSort).reservoir
+    );
+    const sortVoltageV2 = sortVoltageV1.map(
+      i => JSON.parse(i.optionSort).voltage
+    );
+    sortReservoir = [...new Set(sortReservoirV2)];
+    sortVoltage = [...new Set(sortVoltageV2)];
+  }
+
+  if (['Інвентори'].includes(type)) {
+    const sortPhasesV1 = result.filter(i => JSON.parse(i.optionSort).phases);
+    const sortPhasesV2 = sortPhasesV1.map(i => JSON.parse(i.optionSort).phases);
+    sortPhases = [...new Set(sortPhasesV2)];
+  }
+
+  res
+    .status(200)
+    .json({
+      sortBrand,
+      sortCountry,
+      sortMaterial,
+      sortPhases,
+      sortPower,
+      sortReservoir,
+      sortSubtype,
+      sortVoltage,
+    });
+};
+
 const getAllComponents = async (req, res) => {
   const {
     limit = 12,
@@ -96,9 +178,6 @@ const getAllComponents = async (req, res) => {
     brand,
     country,
   } = req.query;
-
-  console.log('type', type);
-  console.log('Всі' === type);
 
   let result = await getComponents(type);
 
@@ -370,4 +449,5 @@ module.exports = {
   getComponentById: ctrlWrapper(getComponentById),
   deleteComponentById: ctrlWrapper(deleteComponentById),
   updateStoreComponents: ctrlWrapper(updateStoreComponents),
+  getComponentOption: ctrlWrapper(getComponentOption),
 };
