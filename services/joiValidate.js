@@ -92,11 +92,11 @@ exports.CreateStoreComponents = data =>
       type: Joi.string()
         .valid(
           'Панелі',
-          'Інвентори',
+          'Інвертори',
           'Акумулятори',
           'Кріплення',
           'Комлпектуючі',
-          'Контролери заряду'
+          'Зарядні станції'
         )
         .required(),
       cost: Joi.number().min(0).required(),

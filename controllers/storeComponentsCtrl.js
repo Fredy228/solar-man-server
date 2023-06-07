@@ -98,24 +98,28 @@ const getComponentOption = async (req, res) => {
 
   const sortBrandV1 = result.filter(i => i.brand !== 'unknown');
   const sortBrandV2 = sortBrandV1.map(i => i.brand);
-  sortBrand = [...new Set(sortBrandV2)];
+  const sortBrandRes = [...new Set(sortBrandV2)];
+  sortBrand = sortBrandRes.length > 0 ? sortBrandRes : undefined;
 
   const sortCountryV1 = result.filter(i => i.country !== 'unknown');
   const sortCountryV2 = sortCountryV1.map(i => i.country);
-  sortCountry = [...new Set(sortCountryV2)];
+  const sortCountryRes = [...new Set(sortCountryV2)];
+  sortCountry = sortCountryRes.length > 0 ? sortCountryRes : undefined;
 
-  if (['Панелі', 'Інвентори', 'Акумулятори', 'Кріплення'].includes(type)) {
+  if (['Панелі', 'Інвертори', 'Акумулятори', 'Кріплення'].includes(type)) {
     const sortSubtypeV1 = result.filter(i => JSON.parse(i.optionSort).subtype);
     const sortSubtypeV2 = sortSubtypeV1.map(
       i => JSON.parse(i.optionSort).subtype
     );
-    sortSubtype = [...new Set(sortSubtypeV2)];
+    const sortSubtypeRes = [...new Set(sortSubtypeV2)];
+    sortSubtype = sortSubtypeRes.length > 0 ? sortSubtypeRes : undefined;
   }
 
-  if (['Панелі', 'Інвентори'].includes(type)) {
+  if (['Панелі', 'Інвертори'].includes(type)) {
     const sortPowerV1 = result.filter(i => JSON.parse(i.optionSort).power);
     const sortPowerV2 = sortPowerV1.map(i => JSON.parse(i.optionSort).power);
-    sortPower = [...new Set(sortPowerV2)];
+    const sortPowerRes = [...new Set(sortPowerV2)];
+    sortPower = sortPowerRes.length > 0 ? sortPowerRes : undefined;
   }
 
   if (['Кріплення'].includes(type)) {
@@ -125,7 +129,8 @@ const getComponentOption = async (req, res) => {
     const sortMaterialV2 = sortMaterialV1.map(
       i => JSON.parse(i.optionSort).material
     );
-    sortMaterial = [...new Set(sortMaterialV2)];
+    const sortMaterialRes = [...new Set(sortMaterialV2)];
+    sortMaterial = sortMaterialRes.length > 0 ? sortMaterialRes : undefined;
   }
 
   if (['Акумулятори'].includes(type)) {
@@ -139,28 +144,29 @@ const getComponentOption = async (req, res) => {
     const sortVoltageV2 = sortVoltageV1.map(
       i => JSON.parse(i.optionSort).voltage
     );
-    sortReservoir = [...new Set(sortReservoirV2)];
-    sortVoltage = [...new Set(sortVoltageV2)];
+    const sortReservoirRes = [...new Set(sortReservoirV2)];
+    const sortVoltageRes = [...new Set(sortVoltageV2)];
+    sortVoltage = sortVoltageRes.length > 0 ? sortVoltageRes : undefined;
+    sortReservoir = sortReservoirRes.length > 0 ? sortReservoirRes : undefined;
   }
 
-  if (['Інвентори'].includes(type)) {
+  if (['Інвертори'].includes(type)) {
     const sortPhasesV1 = result.filter(i => JSON.parse(i.optionSort).phases);
     const sortPhasesV2 = sortPhasesV1.map(i => JSON.parse(i.optionSort).phases);
-    sortPhases = [...new Set(sortPhasesV2)];
+    const sortPhasesRes = [...new Set(sortPhasesV2)];
+    sortPhases = sortPhasesRes.length > 0 ? sortPhasesRes : undefined;
   }
 
-  res
-    .status(200)
-    .json({
-      sortBrand,
-      sortCountry,
-      sortMaterial,
-      sortPhases,
-      sortPower,
-      sortReservoir,
-      sortSubtype,
-      sortVoltage,
-    });
+  res.status(200).json({
+    sortBrand,
+    sortCountry,
+    sortMaterial,
+    sortPhases,
+    sortPower,
+    sortReservoir,
+    sortSubtype,
+    sortVoltage,
+  });
 };
 
 const getAllComponents = async (req, res) => {
@@ -179,6 +185,9 @@ const getAllComponents = async (req, res) => {
     country,
   } = req.query;
 
+  console.log(subtype, 'subtype');
+  console.log(power, 'power');
+
   let result = await getComponents(type);
 
   if (!result) throw httpError(400, `Помилка получення товарів з БД`);
@@ -191,11 +200,11 @@ const getAllComponents = async (req, res) => {
   if (
     [
       'Панелі',
-      'Інвентори',
+      'Інвертори',
       'Акумулятори',
       'Кріплення',
       'Комлпектуючі',
-      'Контролери заряду',
+      'Зарядні станції',
     ].includes(type) &&
     brand
   ) {
@@ -206,11 +215,11 @@ const getAllComponents = async (req, res) => {
   if (
     [
       'Панелі',
-      'Інвентори',
+      'Інвертори',
       'Акумулятори',
       'Кріплення',
       'Комлпектуючі',
-      'Контролери заряду',
+      'Зарядні станції',
     ].includes(type) &&
     country
   ) {
@@ -219,7 +228,7 @@ const getAllComponents = async (req, res) => {
   }
 
   if (
-    ['Панелі', 'Інвентори', 'Акумулятори', 'Кріплення'].includes(type) &&
+    ['Панелі', 'Інвертори', 'Акумулятори', 'Кріплення'].includes(type) &&
     subtype
   ) {
     const optionFilter = subtype.split('_');
@@ -227,7 +236,7 @@ const getAllComponents = async (req, res) => {
       optionFilter.includes(JSON.parse(item.optionSort).subtype)
     );
   }
-  if (['Панелі', 'Інвентори'].includes(type) && power) {
+  if (['Панелі', 'Інвертори'].includes(type) && power) {
     const optionFilter = power.split('_');
     result = result.filter(item =>
       optionFilter.includes(JSON.parse(item.optionSort).power)
@@ -251,7 +260,7 @@ const getAllComponents = async (req, res) => {
       optionFilter.includes(JSON.parse(item.optionSort).voltage)
     );
   }
-  if (['Інвентори'].includes(type) && phases) {
+  if (['Інвертори'].includes(type) && phases) {
     const optionFilter = phases.split('_');
     result = result.filter(item =>
       optionFilter.includes(JSON.parse(item.optionSort).phases)
@@ -274,7 +283,7 @@ const getAllComponents = async (req, res) => {
         break;
     }
 
-    if (['Панелі', 'Інвентори'].includes(type)) {
+    if (['Панелі', 'Інвертори'].includes(type)) {
       switch (sort) {
         case 'с-power-down':
           result.sort(
