@@ -54,7 +54,7 @@ const createPost = async (title, year, components, urlImg) => {
 
     db.run(
       `INSERT INTO portfolio(id, title, year, components, urlImg, dateCreated, series) VALUES(?,?,?,?,?,?,?)`,
-      [id, title, year, components, urlImg, dateCreated, 9999],
+      [id, title, year, components, urlImg, dateCreated, 0],
       function (err) {
         if (err) reject(err);
 
@@ -141,8 +141,6 @@ const updateOrderPosts = objects => {
 
     objects.forEach(element => {
       const { id, series } = element;
-      console.log('=================');
-      console.log(element);
 
       db.run(
         'UPDATE portfolio SET series = ? WHERE id = ?',

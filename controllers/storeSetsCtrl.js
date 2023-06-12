@@ -1,17 +1,43 @@
+require('dotenv').config();
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const ctrlWrapper = require('../services/ctrlWrapper');
 const validators = require('../services/joiValidate');
 const ImageService = require('../services/imageService');
 const httpError = require('../services/httpError');
+
 const {
   createSet,
   getSets,
   getOneSet,
   deleteSet,
   updateSet,
+  alterTableDB,
+  updateHomeSets,
+  updateOrderSets,
 } = require('../services/storeDB');
 const paginateItems = require('../services/paginateItems');
+
+const workWithTableStoreDB = async (req, res) => {
+  const { tableName, newColumnName, datatype } = req.query;
+  const { key } = req.body;
+  const { typeWork } = req.params;
+
+  if (!tableName) throw httpError(400, `You do not pass tableName`);
+
+  if (!['create-db', 'alter-db'].includes(typeWork))
+    throw httpError(400, `You pass wrong typeWork`);
+
+  if (process.env.DB_PERSONAL_KEY !== key)
+    throw httpError(401, `Wrong the key`);
+
+  if (typeWork === 'alter-db') {
+    if (!newColumnName) throw httpError(400, `You do not pass newColumnName`);
+    await alterTableDB(tableName, newColumnName, datatype);
+  }
+
+  res.status(200).json({ message: 'Done' });
+};
 
 const createStoreSets = async (req, res) => {
   const {
@@ -148,6 +174,36 @@ const getAllSets = async (req, res) => {
   res.status(200).json({ result: paginateSet, count: result.length });
 };
 
+const getHomeSets = async (req, res) => {
+  const data = await getSets('Всі');
+
+  const result = data.filter(({ home }) => JSON.parse(home).value);
+
+  const sotrArr = result.sort(
+    (a, b) => JSON.parse(a.home).series - JSON.parse(b.home).series
+  );
+
+  if (!result) throw httpError(400);
+
+  res.status(200).json({ result: sotrArr });
+};
+
+const updateSetsHome = async (req, res) => {
+  const { idSetHome } = req.params;
+
+  const findSet = await getOneSet(idSetHome);
+  if (!findSet) throw httpError(404, `Товар по /${idSetHome}/ не знайдено`);
+
+  const home = {
+    value: !JSON.parse(findSet.home).value,
+    series: 999,
+  };
+
+  await updateHomeSets(idSetHome, home);
+
+  res.status(200).json({});
+};
+
 const getSetById = async (req, res) => {
   const { setId } = req.params;
 
@@ -271,10 +327,21 @@ const updateStoreSets = async (req, res) => {
   });
 };
 
+const updateSetsOrder = async (req, res) => {
+  const objects = req.body;
+  const data = await updateOrderSets(objects);
+
+  res.status(200).json({ status: data });
+};
+
 module.exports = {
   createStoreSets: ctrlWrapper(createStoreSets),
   getAllSets: ctrlWrapper(getAllSets),
   getSetById: ctrlWrapper(getSetById),
   deleteSetById: ctrlWrapper(deleteSetById),
   updateStoreSets: ctrlWrapper(updateStoreSets),
+  workWithTableStoreDB: ctrlWrapper(workWithTableStoreDB),
+  getHomeSets: ctrlWrapper(getHomeSets),
+  updateSetsHome: ctrlWrapper(updateSetsHome),
+  updateSetsOrder: ctrlWrapper(updateSetsOrder),
 };

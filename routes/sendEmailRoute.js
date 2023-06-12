@@ -53,7 +53,7 @@ const chatId =
     : process.env.TELEGRAM_CHAT_ID;
 
 router.post('/telegram', async (req, res) => {
-  const { name, phone } = req.body;
+  const { name, phone, currentGood } = req.body;
 
   const { error, value } = validators.sendEmailValidator({ name, phone });
   console.log(value);
@@ -61,11 +61,12 @@ router.post('/telegram', async (req, res) => {
     return res.status(400).json({ message: 'Invalidate number phone or name' });
   }
 
+  let message = `Ім'я: ${value.name}; \nНомер телефону: ${value.phone}; \n`;
+
+  if (currentGood) message += `Заявка стосовно: ${currentGood}`;
+
   bot
-    .sendMessage(
-      chatId,
-      `Ім'я: ${value.name}; \nНомер телефону: ${value.phone};`
-    )
+    .sendMessage(chatId, message)
     .then(() => {
       return res.status(200).json({ message: 'Sent' });
     })

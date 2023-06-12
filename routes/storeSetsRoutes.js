@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const upload = multer();
+const router = express.Router();
 
 const { protect, allowFor } = require('../middleware/tokenAuth');
 
@@ -10,10 +11,26 @@ const {
   deleteSetById,
   getSetById,
   updateStoreSets,
+  workWithTableStoreDB,
+  getHomeSets,
+  updateSetsHome,
+  updateSetsOrder,
 } = require('../controllers/storeSetsCtrl');
 
-const router = express.Router();
-
+router.post('/work-db/:typeWork', workWithTableStoreDB);
+router.post(
+  '/home-sets',
+  protect,
+  allowFor('admin moderator'),
+  updateSetsOrder
+);
+router.get('/home-sets', getHomeSets);
+router.patch(
+  '/home-sets/:idSetHome',
+  protect,
+  allowFor('admin moderator'),
+  updateSetsHome
+);
 router.post(
   '/',
   protect,
@@ -25,10 +42,8 @@ router.post(
   ]),
   createStoreSets
 );
-
 router.get('/', getAllSets);
 router.get('/by-id/:setId', getSetById);
-
 router.delete(
   '/by-id/:setId',
   protect,
