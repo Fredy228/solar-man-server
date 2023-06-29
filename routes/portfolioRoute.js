@@ -42,7 +42,7 @@ router.post(
 
       const urlImg = await ImageService.save(
         file,
-        { width: 500, height: 400 },
+        { width: 450, height: 260 },
         'images',
         'portfolio'
       );
@@ -154,7 +154,7 @@ router.patch(
 
         urlImg = await ImageService.save(
           file,
-          { width: 500, height: 400 },
+          { width: 450, height: 280 },
           'images',
           'portfolio'
         );

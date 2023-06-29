@@ -70,7 +70,7 @@ const createStoreSets = async (req, res) => {
 
   const pathPhoto = await ImageService.save(
     photo[0],
-    { width: 500, height: 500 },
+    { width: 500, height: 500, fit: 'inside' },
     'images',
     'store',
     idSets
@@ -269,7 +269,7 @@ const updateStoreSets = async (req, res) => {
   if (photo) {
     pathPhoto = await ImageService.save(
       photo[0],
-      { width: 500, height: 500 },
+      { width: 500, height: 500, fit: 'inside' },
       'images',
       'store',
       findSet.id
