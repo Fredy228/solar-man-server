@@ -1,5 +1,4 @@
 const sqlite3 = require('sqlite3').verbose();
-const { v4: uuidv4 } = require('uuid');
 
 const toConectDB = () => {
   const db = new sqlite3.Database('database/portfolio.db', err => {
@@ -18,7 +17,7 @@ const toConectDB = () => {
       if (!result) {
         // Таблицы не существует, создаем ее
         db.run(
-          'CREATE TABLE portfolio (series INTEGER, id TEXT, title TEXT, year TEXT, components TEXT, urlImg TEXT, dateCreated INTEGER)',
+          'CREATE TABLE portfolio (series INTEGER, id TEXT, title TEXT, year TEXT, components TEXT, urlImg TEXT, dateCreated INTEGER, galleryUrl TEXT)',
           err => {
             if (err) {
               console.error(err.message);
@@ -44,21 +43,19 @@ const toCloseDB = db => {
   });
 };
 
-const createPost = async (title, year, components, urlImg) => {
+const createPost = async (title, year, components, urlImg, galleryUrl, id) => {
   return new Promise((resolve, reject) => {
     const db = toConectDB();
-
-    const id = uuidv4();
 
     const dateCreated = Date.now();
 
     db.run(
-      `INSERT INTO portfolio(id, title, year, components, urlImg, dateCreated, series) VALUES(?,?,?,?,?,?,?)`,
-      [id, title, year, components, urlImg, dateCreated, 0],
+      `INSERT INTO portfolio(id, title, year, components, urlImg, dateCreated, series, galleryUrl) VALUES(?,?,?,?,?,?,?,?)`,
+      [id, title, year, components, urlImg, dateCreated, 0, galleryUrl],
       function (err) {
         if (err) reject(err);
 
-        const newPost = { id, title, year, components, urlImg };
+        const newPost = { id, title, year, components, urlImg, galleryUrl };
         console.log(newPost);
         resolve(newPost);
       }
@@ -109,13 +106,13 @@ const deletePosts = id => {
   });
 };
 
-const updatePost = (id, title, year, components, urlImg) => {
+const updatePost = (id, title, year, components, urlImg, galleryUrl) => {
   return new Promise((resolve, reject) => {
     const db = toConectDB();
 
     db.run(
-      `UPDATE portfolio SET title = COALESCE(?, title), year = COALESCE(?, year), components = COALESCE(?, components), urlImg = COALESCE(?, urlImg) WHERE id = ?`,
-      [title, year, components, urlImg, id],
+      `UPDATE portfolio SET title = COALESCE(?, title), year = COALESCE(?, year), components = COALESCE(?, components), urlImg = COALESCE(?, urlImg), galleryUrl = COALESCE(?, galleryUrl) WHERE id = ?`,
+      [title, year, components, urlImg, galleryUrl, id],
       function (err) {
         if (err) reject(err.message);
 
