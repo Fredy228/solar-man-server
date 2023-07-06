@@ -8,9 +8,9 @@ require('dotenv').config();
 const router = express.Router();
 
 router.post('/email', async (req, res) => {
-  const { name, phone } = req.body;
+  const { name, phone, email } = req.body;
 
-  const { error, value } = validators.sendEmailValidator({ name, phone });
+  const { error, value } = validators.sendEmailValidator({ name, phone, email });
   if (error) {
     return res.status(400).json({ message: 'Invalidate number phone' });
   }
@@ -53,15 +53,17 @@ const chatId =
     : process.env.TELEGRAM_CHAT_ID;
 
 router.post('/telegram', async (req, res) => {
-  const { name, phone, currentGood } = req.body;
+  const { name, phone, email, currentGood } = req.body;
 
-  const { error, value } = validators.sendEmailValidator({ name, phone });
+  const { error, value } = validators.sendEmailValidator({ name, phone, email });
   console.log(value);
   if (error) {
     return res.status(400).json({ message: 'Invalidate number phone or name' });
   }
 
   let message = `Ім'я: ${value.name}; \nНомер телефону: ${value.phone}; \n`;
+
+  if (email) message += `Email: ${email}; \n`
 
   if (currentGood) message += `Заявка стосовно: ${currentGood}`;
 

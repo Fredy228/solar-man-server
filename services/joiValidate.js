@@ -9,6 +9,7 @@ exports.sendEmailValidator = data =>
           /^(\+38)?\s?(\(0\d{2}\)|0\d{2})[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}$/
         )
         .required(),
+      email: Joi.string().email(),
     })
     .options({ stripUnknown: true })
     .validate(data);
