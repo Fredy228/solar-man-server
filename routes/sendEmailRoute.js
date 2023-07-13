@@ -58,7 +58,10 @@ router.post('/telegram', async (req, res) => {
   const { error, value } = validators.sendEmailValidator({ name, phone, email });
   console.log(value);
   if (error) {
-    return res.status(400).json({ message: 'Invalidate number phone or name' });
+    console.log(error.message);
+    if (error.message.includes("name")) return res.status(400).json({ message: "Ваше ім'я повино будти від 2 до 20 символів" });
+    if (error.message.includes("email")) return res.status(400).json({ message: "Ваш email невірний" });
+    if (error.message.includes("phone")) return  res.status(400).json({ message: "Ваш номер телефону невірний" });
   }
 
   let message = `Ім'я: ${value.name}; \nНомер телефону: ${value.phone}; \n`;

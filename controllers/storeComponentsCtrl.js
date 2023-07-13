@@ -119,6 +119,9 @@ const getComponentOption = async (req, res) => {
     const sortPowerV1 = result.filter(i => JSON.parse(i.optionSort).power);
     const sortPowerV2 = sortPowerV1.map(i => JSON.parse(i.optionSort).power);
     const sortPowerRes = [...new Set(sortPowerV2)];
+    sortPowerRes.sort(
+      (a, b) => Number(a.split('-')[0]) - Number(b.split('-')[0])
+    );
     sortPower = sortPowerRes.length > 0 ? sortPowerRes : undefined;
   }
 
@@ -146,6 +149,12 @@ const getComponentOption = async (req, res) => {
     );
     const sortReservoirRes = [...new Set(sortReservoirV2)];
     const sortVoltageRes = [...new Set(sortVoltageV2)];
+    sortReservoirRes.sort(
+      (a, b) => Number(a.split('-')[0]) - Number(b.split('-')[0])
+    );
+    sortVoltageRes.sort(
+      (a, b) => Number(a.split('-')[0]) - Number(b.split('-')[0])
+    );
     sortVoltage = sortVoltageRes.length > 0 ? sortVoltageRes : undefined;
     sortReservoir = sortReservoirRes.length > 0 ? sortReservoirRes : undefined;
   }
@@ -154,6 +163,7 @@ const getComponentOption = async (req, res) => {
     const sortPhasesV1 = result.filter(i => JSON.parse(i.optionSort).phases);
     const sortPhasesV2 = sortPhasesV1.map(i => JSON.parse(i.optionSort).phases);
     const sortPhasesRes = [...new Set(sortPhasesV2)];
+    sortPhasesRes.sort((a, b) => Number(a) - Number(b));
     sortPhases = sortPhasesRes.length > 0 ? sortPhasesRes : undefined;
   }
 
@@ -184,9 +194,6 @@ const getAllComponents = async (req, res) => {
     brand,
     country,
   } = req.query;
-
-  console.log(subtype, 'subtype');
-  console.log(power, 'power');
 
   let result = await getComponents(type);
 
@@ -284,24 +291,19 @@ const getAllComponents = async (req, res) => {
     }
 
     if (['Панелі', 'Інвертори'].includes(type)) {
-      switch (sort) {
-        case 'с-power-down':
-          result.sort(
-            (a, b) =>
-              Number(JSON.parse(b.optionSort).power.split('-')[0]) -
-              Number(JSON.parse(a.optionSort).power.split('-')[0])
-          );
-          break;
-        case 'с-power-up':
-          result.sort(
-            (a, b) =>
-              Number(JSON.parse(a.optionSort).power.split('-')[0]) -
-              Number(JSON.parse(b.optionSort).power.split('-')[0])
-          );
-          break;
-        default:
-          break;
-      }
+      const powerDown = 'c-power-down';
+      const powerUp = 'c-power-up';
+
+      result.sort((a, b) => {
+        const first = Number(JSON.parse(a.optionSort).power.split('-')[0]);
+        const second = Number(JSON.parse(b.optionSort).power.split('-')[0]);
+        if (sort === powerUp) {
+          return first - second;
+        }
+        if (sort === powerDown) {
+          return second - first;
+        }
+      });
     }
 
     if (['Акумулятори'].includes(type)) {
