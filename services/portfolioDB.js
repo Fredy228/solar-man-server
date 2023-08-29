@@ -143,12 +143,10 @@ const updateOrderPosts = objects => {
         'UPDATE portfolio SET series = ? WHERE id = ?',
         [series, id],
         function (err) {
-          console.error(err);
           if (err) reject(err.message);
         }
       );
     });
-
     resolve('OK');
 
     toCloseDB(db);

@@ -14,6 +14,48 @@ exports.sendEmailValidator = data =>
     .options({ stripUnknown: true })
     .validate(data);
 
+exports.QuizValidator = data =>
+  Joi.object()
+    .keys({
+      name: Joi.string().min(2).max(20).required(),
+      phone: Joi.string()
+        .pattern(
+          /^(\+38)?\s?(\(0\d{2}\)|0\d{2})[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}$/
+        )
+        .required(),
+      email: Joi.string().email(),
+      forWhat: Joi.string()
+        .valid(
+          'Підприємство (офіс, ТРЦ, готель, ресторан)',
+          'Власний будинок',
+          'Заробіток на зеленому тарифі'
+        )
+        .required(),
+      problem: Joi.string()
+        .valid(
+          'Повна незалежність від електромережі',
+          'Компенсація частини споживання',
+          'Резервне живлення',
+          'Пасивний дохід'
+        )
+        .required(),
+      power: Joi.string()
+        .valid(
+          'до 5 кВт',
+          'до 10 кВт',
+          'до 20 кВт',
+          'до 30 кВт',
+          'більше 30 кВт'
+        )
+        .required(),
+      country: Joi.string()
+        .valid('Одеса', 'Миколаїв', 'Область', 'Інше')
+        .required(),
+      whichCountry: Joi.string().min(0).max(40),
+    })
+    .options({ stripUnknown: true })
+    .validate(data);
+
 exports.userRegister = data =>
   Joi.object()
     .keys({
