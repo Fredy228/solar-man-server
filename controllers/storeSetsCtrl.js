@@ -176,16 +176,19 @@ const getAllSets = async (req, res) => {
 
 const getHomeSets = async (req, res) => {
   const data = await getSets('Всі');
+  const { limit = 8, page = 1 } = req.query;
 
   const result = data.filter(({ home }) => JSON.parse(home).value);
+
+  if (!result) throw httpError(400);
 
   const sotrArr = result.sort(
     (a, b) => JSON.parse(a.home).series - JSON.parse(b.home).series
   );
 
-  if (!result) throw httpError(400);
+  const paginateSet = paginateItems(sotrArr, limit, page);
 
-  res.status(200).json({ result: sotrArr });
+  res.status(200).json({ result: paginateSet, total: sotrArr.length });
 };
 
 const updateSetsHome = async (req, res) => {

@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require('axios');
 const nodemailer = require('nodemailer');
 const mg = require('nodemailer-mailgun-transport');
 const TelegramBot = require('node-telegram-bot-api');
@@ -83,6 +84,24 @@ router.post('/telegram', async (req, res) => {
 
   if (currentGood) message += `Заявка стосовно: ${currentGood}`;
 
+  const { data } = await axios.post(
+    '/v1/pipelines/cards',
+    {
+      contact: {
+        full_name: value.name,
+        phone: value.phone,
+      },
+    },
+    {
+      baseURL: 'https://openapi.keycrm.app',
+      headers: {
+        Authorization: `Bearer MGY0MWQ2NTQ1M2UzZGRiYTdlNzk5MWVlOWFiNzYwZDhhZGM0MDc1Zg`,
+      },
+    }
+  );
+
+  console.log(data);
+
   bot
     .sendMessage(chatId, message)
     .then(() => {
@@ -93,6 +112,26 @@ router.post('/telegram', async (req, res) => {
       return res.status(400).json({ message: error });
     });
 });
+
+// export const sendToSRM = async (name, phone) => {
+//   const { data } = await axios.post(
+//     '/v1/pipelines/cards',
+//     {
+//       contact: {
+//         full_name: name,
+//         phone,
+//       },
+//     },
+//     {
+//       baseURL: 'https://openapi.keycrm.app',
+//       headers: {
+//         Authorization: `Bearer MGY0MWQ2NTQ1M2UzZGRiYTdlNzk5MWVlOWFiNzYwZDhhZGM0MDc1Zg`,
+//       },
+//     }
+//   );
+//
+//   return data;
+// };
 
 router.post('/quiz', async (req, res) => {
   console.log(req.body);
@@ -130,9 +169,30 @@ router.post('/quiz', async (req, res) => {
 
   let message = `Ім'я: ${value.name}; \nНомер телефону: ${value.phone}; \n`;
 
-  message += `Quiz: \n 1)${value.forWhat} \n 2)${value.problem} \n 3)${value.power} \n 4)${value.country}`;
+  let comment = `Quiz: \n 1)${value.forWhat} \n 2)${value.problem} \n 3)${value.power} \n 4)${value.country}`;
 
-  if (value.whichCountry) message += `: ${value.whichCountry}`;
+  if (value.whichCountry) comment += `: ${value.whichCountry}`;
+
+  message += comment;
+
+  const { data } = await axios.post(
+    '/v1/pipelines/cards',
+    {
+      manager_comment: comment,
+      contact: {
+        full_name: value.name,
+        phone: value.phone,
+      },
+    },
+    {
+      baseURL: 'https://openapi.keycrm.app',
+      headers: {
+        Authorization: `Bearer MGY0MWQ2NTQ1M2UzZGRiYTdlNzk5MWVlOWFiNzYwZDhhZGM0MDc1Zg`,
+      },
+    }
+  );
+
+  console.log(data);
 
   bot
     .sendMessage(chatId, message)
