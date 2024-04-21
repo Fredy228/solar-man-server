@@ -8,6 +8,11 @@ require('dotenv').config();
 
 const router = express.Router();
 
+const SOURCE_ENUM = {
+  GOOGLE: 1,
+  FB_INSTA: 2,
+};
+
 router.post('/email', async (req, res) => {
   const { name, phone, email } = req.body;
 
@@ -113,28 +118,9 @@ router.post('/telegram', async (req, res) => {
     });
 });
 
-// export const sendToSRM = async (name, phone) => {
-//   const { data } = await axios.post(
-//     '/v1/pipelines/cards',
-//     {
-//       contact: {
-//         full_name: name,
-//         phone,
-//       },
-//     },
-//     {
-//       baseURL: 'https://openapi.keycrm.app',
-//       headers: {
-//         Authorization: `Bearer MGY0MWQ2NTQ1M2UzZGRiYTdlNzk5MWVlOWFiNzYwZDhhZGM0MDc1Zg`,
-//       },
-//     }
-//   );
-//
-//   return data;
-// };
-
 router.post('/quiz', async (req, res) => {
-  console.log(req.body);
+  const { utm_medium, utm_source, utm_campaign, utm_term, utm_content } =
+    req.query;
 
   const { error, value } = validators.QuizValidator(req.body);
   if (error) {
@@ -175,24 +161,34 @@ router.post('/quiz', async (req, res) => {
 
   message += comment;
 
-  const { data } = await axios.post(
-    '/v1/pipelines/cards',
-    {
-      manager_comment: comment,
-      contact: {
-        full_name: value.name,
-        phone: value.phone,
-      },
+  let bodyCRM = {
+    manager_comment: comment,
+    contact: {
+      full_name: value.name,
+      phone: value.phone,
     },
-    {
+    utm_campaign,
+    utm_medium,
+    utm_content,
+    utm_term,
+    utm_source,
+  };
+
+  if (utm_source === 'fb-insta') bodyCRM.source_id = SOURCE_ENUM.FB_INSTA;
+  if (utm_source === 'google') bodyCRM.source_id = SOURCE_ENUM.GOOGLE;
+  console.log('bodyCRM', bodyCRM);
+
+  try {
+    const { data } = await axios.post('/v1/pipelines/cards', bodyCRM, {
       baseURL: 'https://openapi.keycrm.app',
       headers: {
         Authorization: `Bearer MGY0MWQ2NTQ1M2UzZGRiYTdlNzk5MWVlOWFiNzYwZDhhZGM0MDc1Zg`,
       },
-    }
-  );
-
-  console.log(data);
+    });
+    console.log(data);
+  } catch (e) {
+    console.log(e);
+  }
 
   bot
     .sendMessage(chatId, message)
