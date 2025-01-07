@@ -2,6 +2,8 @@ const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
 const path = require("path");
+require("dotenv").config();
+
 const sendEmailRouter = require("./routes/sendEmailRoute");
 const usersRouter = require("./routes/usersRoute");
 const portfolioRouter = require("./routes/portfolioRoute");
@@ -37,7 +39,7 @@ app.use((err, req, res, next) => {
   res.status(status).json({ message });
 });
 
-const PORT = process.env.NODE_ENV === "development" ? 3001 : 5000;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
