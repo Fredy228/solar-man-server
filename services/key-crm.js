@@ -4,6 +4,7 @@ const axios = require("axios");
 const SOURCE_ENUM = {
   google: 1,
   "fb-insta": 2,
+  "custom-p": 5,
 };
 
 class KeyCrm {
