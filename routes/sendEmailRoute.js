@@ -50,6 +50,8 @@ router.post("/email", async (req, res) => {
 
 router.post("/telegram", async (req, res) => {
   const { name, phone, email, currentGood } = req.body;
+  const { utm_medium, utm_source, utm_campaign, utm_term, utm_content } =
+    req.query;
 
   const { error, value } = validators.sendEmailValidator({
     name,
@@ -75,7 +77,14 @@ router.post("/telegram", async (req, res) => {
 
   if (currentGood) message += `Заявка стосовно: ${currentGood}`;
 
-  if (process.env.NODE_ENV === "production") await KeyCrm.sendPipe(value);
+  if (process.env.NODE_ENV === "production")
+    await KeyCrm.sendPipe(value, undefined, {
+      utm_campaign,
+      utm_medium,
+      utm_content,
+      utm_term,
+      utm_source,
+    });
 
   const isSendTelegram = await TelegramSender.sendMessage(message);
   if (!isSendTelegram)
